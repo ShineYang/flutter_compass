@@ -61,6 +61,8 @@ public final class FlutterCompassPlugin implements FlutterPlugin, StreamHandler 
     @Nullable
     private EventChannel channel;
 
+    private Context applicationContext;
+
     public FlutterCompassPlugin() {
         // no-op
     }
@@ -92,7 +94,7 @@ public final class FlutterCompassPlugin implements FlutterPlugin, StreamHandler 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
         channel = new EventChannel(binding.getBinaryMessenger(), "hemanthraj/flutter_compass");
-        getSensors(binding.getApplicationContext());
+        this.applicationContext = binding.getApplicationContext(); // 保存上下文
         channel.setStreamHandler(this);
     }
 
@@ -104,6 +106,9 @@ public final class FlutterCompassPlugin implements FlutterPlugin, StreamHandler 
     }
 
     public void onListen(Object arguments, EventSink events) {
+        if (sensorManager == null) {
+            getSensors(applicationContext); // 延迟初始化
+        }
         sensorEventListener = createSensorEventListener(events);
         registerListener();
     }
